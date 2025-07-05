@@ -1,11 +1,17 @@
-# main.py
-
+import os
+from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 import asyncio
-from keep_alive import keep_alive  # <- Flask hinzugefügt für Render/UptimeRobot
+from keep_alive import keep_alive  # Flask-Webserver
 
-BOT_TOKEN = ""  # Trage hier deinen Bot-Token ein
+# Lade .env-Datei (nur lokal relevant, auf Render wird Umgebungsvariable gesetzt)
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+if not BOT_TOKEN:
+    print("ERROR: BOT_TOKEN ist nicht gesetzt! Bitte .env anlegen oder Umgebungsvariable konfigurieren.")
+    exit(1)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -53,6 +59,6 @@ async def reset_channels(ctx):
     send_tasks = [send_messages(ch) for ch in new_channels]
     await asyncio.gather(*send_tasks)
 
-# ⬇ Nur Flask-Server starten, damit Render & UptimeRobot den Bot dauerhaft online halten
+# Starte Flask-Webserver und dann den Bot
 keep_alive()
 bot.run(BOT_TOKEN)
